@@ -1,0 +1,146 @@
+---
+title: "Homework 1"
+author: "Siril Pattammady"
+date: "2/12/2020"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(numbers)
+```
+# Homework 1
+
+## Question 1
+
+```{r}
+#a)What is the plain text character for “S” if the key is 5?
+# Answer: Plain Text Character: "N" 
+
+#b)What is the plain text character for “Y” if the key is 2?
+# Answer: Plain Text Character: "W" 
+
+
+#c)What is the plain text character for “Y” if the key is 12?
+# Answer: Plain Text Character: "M" 
+
+
+#d)What is the plain text character for “C” if the key is 4? Do you get a letter of the English alphabet? How can you fix this problem?
+# Answer Plain Text Character = "Y"
+
+#Answer: The issue for getting the cipher text value here is that the key will surpass the beginning of the alphabet past letter A if we go 4 steps back. In order to fix this problem, we must wrap back around to the end of the alphabet so the plaintext value will be letter "Y".
+
+
+```
+
+
+## Question 2
+
+```{r}
+#a)What is the plain text character for “C” if the key is 5?
+# Answer: Plain Text Character: "F"
+
+#01000011 -- C --> 67
+#00000101 XOR --> KEY 5
+#---------
+#01000110 => 70 => F  
+
+#b)What is the plain text character for “A” if the key is 2?
+#Answer: PLain Text Character: "C"
+
+#01000001 -- A -->65
+#00000010 XOR -- KEY 2
+#--------
+#01000011 => 67 => C
+
+
+#c)What is the plain text character for “H” if the key is 12?
+# Answer: Plain Text Character: "D"
+
+#01001000 -- H --> 72
+#00001100 XOR KEY 12
+#---------
+#01000100 => 68 => D
+
+```
+
+
+## Question 3
+```{r}
+#a)Encrypt the plain text “C” using key = 9.
+# Answer Cipher Text Character = "L"
+
+
+#b)Repeat the above with plain text “J” and key=10.
+# Answer Cipher Text Character = "T"
+
+
+#c)	Repeat the above with plain text “D” and key=19.
+#Answer Cipher Text Character = "W"
+
+#d)	Repeat the above with plain text “Z” and key=12.
+#Answer Cipher Text Character = "L"
+
+```
+
+
+
+## Question 4
+
+```{r}
+#Code
+#Example call function xor_encypt("K",5)
+plain <- "TEST"
+key <-2
+xor_encrypt <- function(plain,key){
+
+  utfConvert <- utf8ToInt(plain)
+  
+  encryption <- bitwXor(utfConvert,key)
+  
+  encrypt_text <- intToUtf8(encryption)
+  return(encrypt_text)
+  
+}
+
+xor_decrypt <- function(cipher,key){
+  
+  cipherConvert <- utf8ToInt(cipher)
+  
+  decryption <- bitwXor(cipherConvert,key)
+  
+  plain_text <- intToUtf8(decryption)
+  return(plain_text)
+}
+
+
+```
+
+## Question 5
+
+```{r}
+#code
+caesar_encrypt <- function(plain,key){
+  
+  utfConvert <- utf8ToInt(plain)-65
+  
+  ciphered <- mod(utfConvert+key,26)
+  
+  cipher_text<- intToUtf8(ciphered+65)
+  return(cipher_text)
+}
+
+caesar_decrypt <- function(cipher,key){
+  
+  cipherConvert <- utf8ToInt(cipher)-65
+  
+  uncipher <- mod(cipherConvert-key,26)
+  
+  plain_text <- intToUtf8(uncipher+65)
+  
+  return(plain_text)
+  
+}
+
+```

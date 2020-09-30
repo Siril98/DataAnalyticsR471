@@ -1,0 +1,342 @@
+---
+title: "Homework 3"
+author: "Siril Pattammady"
+date: "2/21/2020"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(compositions)
+```
+
+# Homework 3
+
+## Question 1
+
+```{r}
+#1). Find the 8 bit binary number for the following characters: “A”,  “t”, “@”, “17”, “9”, “&” [hint: use binary() in package   compositions].
+# Need to use itf8toInt
+
+binaryA <- binary(utf8ToInt('A'),mb =7)
+binaryA
+binaryt <- binary(utf8ToInt('t'),mb=7)
+binaryt
+binaryAt <- binary(utf8ToInt('@'),mb=7)
+binaryAt
+binary17 <- binary(17,mb=7)
+binary17
+binary9 <- binary(9,mb=7)
+binary9
+binaryAmp <- binary(utf8ToInt('&'),mb=7)
+binaryAmp
+
+
+```
+
+##Question 2
+
+```{r}
+
+#2).2.	Find the decimal numbers for the following: "00010110", "00011101", "01011011", "01100101", "00001010", "01100100".
+
+unbinary1 <- unbinary("00010110")
+unbinary1
+unbinary2 <- unbinary("00011101")
+unbinary2
+unbinary3 <- unbinary("00011101")
+unbinary3
+unbinary4 <- unbinary("01100101")
+unbinary4
+unbinary5 <- unbinary("00001010")
+unbinary5
+unbinary6 <- unbinary("01100100")
+unbinary6
+
+
+
+
+```
+##Question 3
+
+```{r}
+#3.	For the seed: "MHID9870"
+#a)	Create the UTF8 encoding.
+
+encode <- utf8ToInt("MHID9870")
+encode
+#b)	Create the 8 bit binary form for the results of a).
+
+toBinary <- binary(encode,mb=7)
+toBinary
+
+#c)	Split the strings into individual bits.
+bitsplit <- strsplit(toBinary, "")
+bitsplit
+
+#d)	Unlist the result of c).
+
+bitUnlist <- unlist(bitsplit)
+bitUnlist
+
+#e)	Put the results of d) into one integer vector.
+
+intVec <- as.integer(bitUnlist)
+intVec
+
+
+```
+##Question 4
+
+```{r}
+#4.)	Fill three variables x, y, and z with the results of 3 such that x gets the first 19, y gets the next 22, and z gets the last 23 bits. Initialize an integer vector k of length 128.
+
+x <- vector(mode = "integer")
+y <- vector(mode = "integer")
+z <- vector(mode = "integer")
+
+x <- intVec[1:19]
+y <- intVec[20:41]
+z <- intVec[42:64]
+
+x
+y
+z
+
+k <- vector(mode = "integer", length=128)
+ 
+```
+
+##Question 5
+
+```{r}
+
+#5)Find the majority value for x[9], y[11] and z[11]. 
+
+x[9]
+y[11]
+z[11]
+findMaj <- names(which.max(table(c(x[9],y[11],z[11]))))
+x
+y
+z
+as.integer(findMaj)
+## Question 6
+
+
+#6) Write code for the following: if x steps then shift x to the right by 1 bit. Next assign the appropriate value to x[1]. Do the same for y and z.
+
+
+#Shift to right by one bit if index is equal to Majority
+
+ if(x[9] == findMaj){
+      for(j in 1:length(x)){
+        if(j == length(x)){
+          x[j] = x[1]
+        }
+        else{
+          x[j] = x[j+1]
+        }
+      }
+
+ }
+
+    if(y[11] == findMaj){
+
+      for(k in 1:length(y)){
+        if(k == length(y)){
+          y[k] = y[1]
+        }
+        else{
+          y[k] = y[k+1]
+        }
+      }
+    }
+
+
+    if(z[11] == findMaj){
+
+      for(m in 1:length(z)){
+        if(m == length(z)){
+          z[m] = z[1]
+        }
+        else{
+          z[m] = z[m+1]
+        }
+      }
+    }
+
+
+
+```
+
+## Question 7
+
+```{r}
+
+#7 Create key stream bit by XOR-in the appropriate bits from x, y, and z vectors.
+x
+y
+z
+
+x[19]
+y[22]
+z[23]
+
+key1 <- bitwXor(x[19],y[22])
+keyStream <- bitwXor(key1,z[23])
+
+# CAN APPEND TO VECTOR THIS SHOWS bit by bit
+#VECTOR APPENDING FOR keystream is in #8
+keyStream
+
+
+```
+
+## Question 8
+```{r}
+
+#8 Write a function for the above and create a 128 bit key stream with the seed mentioned in question 3. You function should contain two parameters: a seed and a key length.
+
+createKey <- function(seed,keyLength){
+  
+  k1 <- vector(mode = "integer", keyLength)
+  
+  encode1 <- utf8ToInt(seed)
+  toBinary1 <- binary(encode1,mb=7)
+  bitsplit1 <- strsplit(toBinary1, "")
+  bitUnlist1 <- unlist(bitsplit1)
+  intVec1 <- as.integer(bitUnlist1)
+  
+  x1 <- vector(mode = "integer")
+  y1 <- vector(mode = "integer")
+  z1 <- vector(mode = "integer")
+  
+  x1 <- intVec1[1:19]
+  y1 <- intVec1[20:41]
+  z1 <- intVec1[42:64]
+  
+
+  for(i in 1:keyLength){
+    
+    findMaj1 <- names(which.max(table(c(x1[9],y1[11],z1[11]))))
+    
+    if(x1[9] == findMaj1){
+      for(j in 1:length(x1)){
+        if(j == length(x1)){
+          x1[j] = x1[1]
+        }
+        else{
+          x1[j] = x1[j+1]
+        }
+      }
+
+    }
+
+    if(y1[11] == findMaj1){
+
+      for(k in 1:length(y1)){
+        if(k == length(y1)){
+          y1[k] = y1[1]
+        }
+        else{
+          y1[k] = y1[k+1]
+        }
+      }
+    }
+
+
+    if(z1[11] == findMaj1){
+
+      for(m in 1:length(z1)){
+        if(m == length(z1)){
+          z1[m] = z1[1]
+        }
+        else{
+          z1[m] = z1[m+1]
+        }
+      }
+    }
+
+    key <- bitwXor(x1[19],y1[22])
+    keyStream1 <- bitwXor(key,z1[23])
+    k1[i] <- keyStream1
+    
+  }
+  print("keystream")
+  return(k1)
+  
+}  
+
+createKey("MHID9870",128)
+
+```
+
+## Question 9
+
+```{r}
+
+#9	Create a function that takes a seed and the number of bits as an input and creates a keystream equal to the size of the bits specified using the A 5/1 algorithm. (16 points)
+
+
+##DISREGARD SAME AS 8 
+
+```
+
+## Questions 10 and 11
+
+```{r}
+
+#10 & 11 Create an A 5/1 encryption algorithm using the function in question 9. (10 points)
+#Out put Printed for convenience
+
+
+A5_algorithm <- function(plain){
+  
+  encode2 <- utf8ToInt(plain)
+  toBinary2 <- binary(encode2,mb=7)
+  bitsplit2 <- strsplit(toBinary2, "")
+  bitUnlist2 <- unlist(bitsplit2)
+  
+  #Plain text as binary
+  binaryPlain <- as.integer(bitUnlist2)
+  
+  print("Plaintext")
+  print(binaryPlain)
+  
+  binaryLen <- length(binaryPlain)
+  
+  #Calls function in #8 to create a key
+  keyStream <- createKey(plain,binaryLen)
+  
+  print(keyStream)
+  
+  #encryption XOR between plain and key
+  cipher <- bitwXor(binaryPlain,keyStream)
+  
+  print("ENCRYPTION: Cipher Text in Binary ")
+  print(cipher)
+  
+  
+  print('____________________')
+
+
+
+#11 Create an A 5/1 decryption algorithm using the function in question 9. (10 points)
+## Decryption Process
+decryption <- bitwXor(cipher,keyStream)
+print("DECRYPTING")
+print("Back to Plain Text")
+decryption
+
+}
+A5_algorithm("SIRILyooo")
+
+```
+
+
+
+

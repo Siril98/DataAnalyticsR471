@@ -1,0 +1,166 @@
+---
+title: "Homework 10"
+author: "Siril Pattammady"
+date: "5/4/2020"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(numbers)
+library(seqinr)
+library(compositions)
+library(openssl)
+library(stringr)
+```
+
+##Question 1
+```{r}
+
+#1. Suppose Alice, Bob, and Charlie are bidding for a camera with a bid of $500, $520, and $530 respectively. Create a has signature of the three bids using SHA-1.
+
+aliceBid <- "500"
+BobBid <- "520"
+CharlieBid <- "530" 
+
+alice <- sha1(aliceBid)
+Bob <- sha1(BobBid)
+Charlie <- sha1(CharlieBid)
+
+alice
+Bob
+Charlie
+
+```
+
+##Question 2
+```{r}
+
+# #2. Suppose Charlie wants to find out Alice’s and Bob’s bids. Everyone can see the hash signatures of the bids. The estimated cost of the camera is between $500-$550. Each bidder first submits the hashed value of their bid with SHA-1. Assuming that the hash values for Alice and Bob are ce09b127d48f83868a45645e246d3b52f4bdecbe and 10d293a95915109e7675b011f404213902624f14 respectively, what is the minimum amount that Charlie needs to bid to win?
+
+for(i in 500:550){
+
+  if(sha1(as.character(i)) == "ce09b127d48f83868a45645e246d3b52f4bdecbe"){
+    print("Alice's Bid is")
+    print(i)
+  }
+  if(sha1(as.character(i)) == "10d293a95915109e7675b011f404213902624f14"){
+    print("Bob's Bid is")
+    print(i)
+  }
+  
+}
+print("So Charlie's Minimum Amount to win at dollar price is $514")
+
+
+
+```
+
+
+##Question 3
+```{r}
+
+#3.Show that the bidders can prevent such an attack by using a key. Assume that Alice’s and Bob’s bids were $505 and $507 respectively.
+
+key <- "f83a383c0fa81f295d057f8f5ed0ba4610947817"
+
+alicebid2 <- "505"
+Bobbid2 <- "507"
+alice2 <- sha1(alicebid2)
+bob2 <- sha1(Bobbid2)
+alice2
+bob2
+
+aliceEnc <- utf8ToInt(alice2)
+BobEnc <- utf8ToInt(bob2)
+keyEnc <- utf8ToInt(key)
+
+print("encyrpt key with xor")
+aliceEncrypted <- bitwXor(aliceEnc,keyEnc)
+bobEncrypted <- bitwXor(BobEnc,keyEnc)
+
+encryptedAlice <- intToUtf8(aliceEncrypted)
+encryptedBob <- intToUtf8(bobEncrypted)
+encryptedAlice
+encryptedBob
+
+```
+
+
+##Question 4
+```{r}
+
+#4.Show that after the bids are hashed with keys Charlie can’t find Alice’s and Bob’s bids using the forward search attach. Note that everyone, including Charlie, can see the hash signature of every bid.
+
+for(i in 500:550){
+
+  if( sha1(as.character(i)) == encryptedAlice){
+    print("Found Alice's Bid at")
+    print(i)
+  }
+  if(sha1(as.character(i)) == encryptedBob){
+    print("Found Bob's bid at")
+    print(i)
+  }
+  if(i == 550){
+    print("Charlie can't find Alice's and Bob's bids using FSA due to key encryption")
+  }
+}
+
+
+
+```
+
+##Question 5
+```{r}
+
+#5.Read the password file hashed_passwords.csv into a data-frame df. Read the dictionary trudy_pass.csv into a data-frame called trudy.df. Examine the content of the data-frames with head().
+
+pswd.df <- read.csv("/Users/psiri/Documents/R/hashed_passwords.csv")
+trudy.df <-read.csv("/Users/psiri/Documents/R/trudy_pass.csv")
+
+head(pswd.df)
+head(trudy.df)
+```
+
+
+##Question 6
+```{r}
+
+#6.Calculate the hashes for each row in trudy.df by combining the password and salt. Use paste0 for combining. Save them in a vector called hashes.
+
+hashes <- vector()
+for(i in 1:nrow(trudy.df)){
+  
+  a<-trudy.df[i,1]
+  b<-trudy.df[i,2]
+  hashes[i] <- paste0(a,b)
+  
+}
+hashes
+
+```
+##Question 7
+
+```{r}
+#7.Find all passwords in Trudy’s dictionary that also appear in the hashed password file. You will need to use for loop to achieve this. (Hint: you should get 300 matches)
+
+hashed_vals <- vector()
+for(i in 1:nrow(pswd.df)){
+  hashed_vals[i] <- as.character(pswd.df[i,2])
+}
+for(j in 1:length(hashes)){
+  
+  results<- str_detect(hashes[j],hashed_vals)
+
+}
+
+results
+print("No matches found")
+```
+
+
+
+

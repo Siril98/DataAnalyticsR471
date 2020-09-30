@@ -1,0 +1,247 @@
+---
+title: "Homework 7"
+author: "Siril Pattammady"
+date: "4/13/2020"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(compositions)
+library(numbers)
+library(seqinr)
+```
+
+##Question 1
+```{r}
+#1.	Create all prime numbers between 40 and 50. [Hint: use Primes() in the package numbers]. Assign the first prime number to a variable called d. (5 points)
+
+primeList <- Primes(40,50)
+primeList
+d <- primeList[1]
+d
+
+
+```
+##Question 2
+```{r}
+
+#2.	Create an integer vector s and assign the following integers to it: 3,25,10,2,6,16, 37, 8. Find the sum of all integers in vector s. (5 points)
+
+
+s <- c(3,25,10,2,6,16,37,8)
+s <- as.integer(s)
+s
+sum_s <- sum(s)
+sum_s
+
+```
+
+##Question 3
+```{r}
+
+#3.	How will you get the sum of first, third, fourth, and seventh elements of s? [Hint: Create an indicator vector P = [1,0,1,1,0,0,1 0]. (5 points)
+
+s
+P <- c(1,0,1,1,0,0,1,0)
+P <- as.integer(P)
+P
+sum2<- sum(P*s)
+sum2
+
+```
+
+##Question 4
+```{r}
+
+#4.	Create the smallest prime integer greater than the sum of all numbers in s. Call it n. (5 points)
+
+sum_s
+
+n <- Primes(sum_s,150)[1]
+n
+
+
+```
+
+##Question 5
+```{r}
+
+#5.	Create the modular inverse (d-1 mod n) and assign it to a variable called m. [Hint: use modinv() in the package numbers]. (5 points)
+
+#sample number for d
+d <- 47
+d
+n
+m <-modinv(d,n)
+m
+
+```
+
+##Question 6
+```{r}
+
+#6.	Write a function called sik() that creates a super increasing sequence of length 8. You can create the first two integers manually but the integers 3-8 should be created using the function runif(). (10 points)
+
+sik <- function(){
+  
+  
+  temp <- vector(mode ='integer')
+  temp[1] <- round(runif(1,1,5))
+  temp[2] <- round(runif(1,temp[1]+1,temp[1]+5))
+  
+  for(i in 3:8)temp[i]<-round(runif(1,sum(head(temp,i-1))+1,temp[i-1]*2))
+  
+ return(temp)
+   
+}
+
+
+
+
+```
+
+##Question 7
+```{r}
+
+#7.	Call sik() to create a super-increasing knapsack of size 8 and assign it to an integer vector s. (5 points)
+
+
+s <- sik()
+s
+
+
+```
+
+##Question 8
+
+```{r}
+
+#8.	Create a general knapsack g using s, d, m and n. (15 points)
+#•	s is a super increasing prime with size 8
+#•	d is a random prime between 40 and 50
+#•	n is a prime that is greater than the sum of the numbers in s
+#•	m is a mod inverse between d and n
+#•	Only s, m and n will be used as the parameter of the general knapsack, you'll use the value d for later calculations
+
+#Updated In Question 9
+s
+m
+n
+
+g<-mod(s*m,n)
+g
+
+
+
+
+```
+
+##Question 9
+
+```{r}
+
+#9.	Write a function called encrypt_knapsack(g,p) to encrypt a binary string such as “11100011” (p) using the knapsack algorithm. Assign the encrypted number to C. (15 points)
+
+encrypt_knapsack <- function(g,p){
+  
+  plain_vec <- unlist(strsplit(p,''))
+  print(plain_vec)
+  
+  s <- as.numeric(plain_vec)*g
+  print(s)
+  C <- sum(s)
+  
+  return(C)
+  
+  
+}
+
+ciphert<-encrypt_knapsack(g,"11100011")
+ciphert
+
+##Updating Value s,n, and d for decryption function
+plain_vec <- unlist(strsplit("11100011",''))
+print(plain_vec)
+s <- as.numeric(plain_vec)*g
+print(s)
+d<-40
+n <- Primes(sum_s,400)[1]
+print(n)
+
+
+```
+
+##Question 10
+```{r}
+
+#10. Consider the set s = [5   6  13  31  69 127 285 684]. Select the subset of integers from s that add up to 233. (15 points)
+
+s1<- c(5,6,13,31,69,127,285)
+s1<-as.integer(s1)
+s1
+
+range = 1
+start <- s1[1]
+for(i in 1:length(s1)){
+  
+  if(start+s1[i+1] <= 233){
+    start<-start+s1[i+1]
+    range<-range+1
+    #print(start)
+    #print(range)
+  }
+  else{
+    print("Subset from s1 up to 233")
+    break
+  }
+}
+
+subset_s <- s1[1:range]
+print(subset_s)
+  
+
+
+
+```
+
+##Question 11
+```{r}
+
+#11.	Write a function called decrypt_knapsack(s, C, d, n) to decrypt a message encrypted with encrypt_knapsack(). (15 points)
+
+
+decrypt_knapsack <- function(s,c,d,n){
+  
+  print(s)
+  psum <- mod(c*d,n)
+  
+  l<-length(s);
+  ind_vec <- vector(mode='integer',length=l)
+  print(ind_vec)
+  
+  for(i in 1:l){
+    if(psum <= s[i] && s[i]!= 0){
+      ind_vec[i]<-1
+      psum<-psum-s[i]
+    }
+  }
+  print("Vector Decrypted")
+  return(ind_vec)
+  
+}
+
+decrypt_knapsack(s,ciphert,d,n)
+
+
+```
+
+
+
+
+
+
+
+

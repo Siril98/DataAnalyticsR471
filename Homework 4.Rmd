@@ -1,0 +1,333 @@
+---
+title: "Homework 4"
+author: "Siril Pattammady"
+date: "2/28/2020"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(numbers)
+library(compositions)
+library(seqinr)
+```
+
+#Homework 4
+
+#Question 1
+
+```{r}
+
+#1.	Create an integer vector S with values from 1-5. Swap elements 1 and 4. [Hint: use the swap() function in package seqinr. ( 10 points)
+
+S<- 1:5
+print(S)
+
+swap(S[1],S[4])
+print(S)
+
+
+```
+
+#Question 2
+
+```{r}
+#2 Create a binary stream of bits for the string "Parabola". (10 points)
+
+strVal <- "Parabola"
+
+encode <- utf8ToInt(strVal)
+
+toBinary <- binary(encode)
+splitBit <- strsplit(toBinary, "")
+unlistBit <- unlist(splitBit)
+
+paraVec <- as.integer(unlistBit)
+paraVec
+
+```
+
+#Question 3
+
+```{r}
+#3.	Create an initialized S vector for RC4. (10 points)
+
+S = vector(mode ="integer",length =256)
+
+for(i in 0:255){
+  S[i+1] = i+1
+}
+
+S
+
+
+
+```
+
+## Question 4
+
+```{r}
+#4.	Create an initialized K vector for RC4. Assume that key is the UTF8 code of "Complete". (10 points)
+
+key <- "Complete"
+keyLen <- nchar(key)
+KeyEncode <- utf8ToInt(key)
+
+
+K = vector(mode ="integer",length =256)
+for(i in 0:255){
+  K[i+1] = KeyEncode[mod(i+1,keyLen)+1]
+}
+
+K
+
+
+
+```
+
+## Question 5
+
+
+```{r}
+#5.	Using the RC4 algorithm randomize S with 256 iterations. (10 points)
+
+j<- 0
+for(i in 0:255){
+  j<- mod((j+ S[i+1]+K[i+1]),256)
+  swap(S[i+1],S[j+1])
+}
+
+S
+
+
+```
+
+## Question 6
+
+```{r}
+
+#6.	Using the RC4 algorithim generate a key stream of 128 bits starting with the output vector S in question 5. Assume that the key is "Complete". (15 points)
+print("State Table")
+S
+
+j=0
+t=0
+keyStrm <- vector(mode = "integer", length=128)
+keyStr <- vector(mode = "integer", length=128)
+for(i in 1:128){
+  i = mod((i+1),256)
+  j = mod((j+S[i]),256)
+  swap(S[i],S[j])
+  t = mod((S[i]+S[j]),256)
+  #print(S[t])
+  keyStrm[i] = S[t]
+}
+
+print("Generated Key Stream table")
+keyStrm
+
+toBinary2 <- binary(keyStrm)
+splitBit2 <- strsplit(toBinary2,"")
+unlistBit2 <- unlist(splitBit2)
+vec<- as.integer(unlistBit2)
+
+for(i in 0:127){
+  keyStr[i+1] = vec[i+1]
+}
+
+print("Key Stream of 128 Binary Bits")
+keyStr
+
+```
+
+
+## Question 7
+
+```{r}
+
+#7.	Implement RC4 for generating key streams. You function should contain two parameters: a seed and a key length. (20 points)
+
+generateKey <- function(seed,keyLength){
+  
+  
+#Initialize State Vector
+S = vector(mode ="integer",length =256)
+
+for(i in 0:255){
+  S[i+1] = i+1
+}
+
+#Initialize K Vector
+key <- seed
+keyLen <- nchar(key)
+KeyEncode <- utf8ToInt(key)
+
+K = vector(mode ="integer",length =256)
+for(i in 0:255){
+  K[i+1] = KeyEncode[mod(i+1,keyLen)+1]
+}
+
+# Permutate using RC4
+
+j<- 0
+for(i in 0:255){
+  j<- mod((j+ S[i+1]+K[i+1]),256)
+  swap(S[i+1],S[j+1])
+}
+
+
+# Creating Key Stream using RC4  
+j=0
+t=0
+keyStrm <- vector(mode = "integer", keyLength)
+keyStr <- vector(mode = "integer", keyLength)
+for(i in 1:keyLength){
+  i = mod((i+1),256)
+  j = mod((j+S[i]),256)
+  swap(S[i],S[j])
+  t = mod((S[i]+S[j]),256)
+  #print(S[t])
+  keyStrm[i] = S[t]
+}
+
+keyStrm
+
+toBinary2 <- binary(keyStrm)
+splitBit2 <- strsplit(toBinary2,"")
+unlistBit2 <- unlist(splitBit2)
+vec<- as.integer(unlistBit2)
+
+for(i in 0:keyLength){
+  keyStr[i+1] = vec[i+1]
+}
+
+return(keyStr)
+
+  
+}
+#SampleRuns
+print("Sample Run 1 length 128 bits")
+generateKey("Complete",128)
+
+print("Sample Run 2 length 255 bits")
+generateKey("Complete",255)
+
+
+```
+
+
+## Question 8
+
+
+```{r}
+
+#8.	Create an encryption function using RC4 that takes a plain text and a key text as input and returns an encrypted stream of bits as output. (5 points)
+
+RC4_encrypt <- function(plain_text,key_text){
+  
+  
+  N<-nchar(plain_text)
+  
+  p <- as.integer(unlist(strsplit(binary(utf8ToInt(plain_text),mb=7),"")))
+  
+  k <- as.integer(unlist(strsplit(binary(generateKey(key_text,N),mb=7),"")))
+  
+  c_binary<-bitwXor(p,k)
+  
+  return(c_binary)
+  
+}
+#Example Encryptions
+print("Encryption 1")
+RC4_encrypt("Our system has been comprimised by our enemies","key24")
+print("Encryption 2")
+RC4_encrypt("HELP SAVE THE SHIP FROM PIRATES", "Treasure")
+
+
+```
+
+
+## Question 9
+
+```{r}
+
+#9.	Create a decryption function using RC4 that takes a cipher as a stream of bits and a key text as input and returns an encrypted stream of bits as output. (5 points)
+
+
+RC4_decrypt <- function(cipher,key_text){
+  
+  N<- length(cipher)/8
+  k <- as.integer(unlist(strsplit(binary(generateKey(key_text,N),mb=7),"")))
+  
+  p_binary <-bitwXor(cipher,k)
+  
+  return(p_binary)
+  
+  
+}
+#Decrypting to binary Examples from #8
+print("Decryption 1")
+cip <- RC4_encrypt("Our system has been comprimised by our enemies","key24")
+RC4_decrypt(cip,"key24")
+
+print("Decryption 2")
+c <- RC4_encrypt("HELP SAVE THE SHIP FROM PIRATES", "Treasure")
+RC4_decrypt(c,"Treasure")
+
+```
+
+
+## Question 10
+
+```{r}
+
+#10.	Create a function that takes a binary stream as input and returns the corresponding text. (5 points)
+
+bin2text <- function(p_binary){
+  
+  N<-length(p_binary)
+  N = N-16 #Binary contains extra 2 bytes
+  p_text <- vector(mode = 'list')
+  
+  i=1
+  j=1
+  
+  
+  while(i <= N){
+    if(mod(i,8)==1){
+      k <- i+7
+      p_text[j]<-intToUtf8(unbinary(paste(p_binary[i:k],collapse='')))
+      print(p_text[j])
+      j <-j+1
+    }
+    i<-i+1
+  }
+  
+  return(paste(unlist(p_text),collapse = ''))
+  
+
+  
+}
+# Decryption back to text based on #8 and 9
+print("Back to Plaintext 1")
+cip <- RC4_encrypt("Our system has been comprimised by our enemies","key24")
+RC4_decrypt(cip,"key24")
+ptex <- RC4_decrypt(cip,"key24")
+bin2text(ptex)
+
+
+
+
+print("Back to Plaintext 2")
+c <- RC4_encrypt("HELP SAVE THE SHIP FROM PIRATES", "Treasure")
+RC4_decrypt(c,"Treasure")
+p <- RC4_decrypt(c,"Treasure")
+bin2text(p)
+
+
+```
+
+
+

@@ -1,0 +1,346 @@
+---
+title: "Homework 6"
+author: "Siril Pattammady"
+date: "4/1/2020"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(compositions)
+library(numbers)
+library(seqinr)
+```
+
+# Homework 6
+
+## Question 1
+
+```{r}
+#1.	Create a second function for substitution box Sbox2() that replicates the Sbox1()  your wrote for homework 5 except that it uses the following substitution boxes: S11 contains the binary of the numbers (4, 0, 6, 5, 7, 1, 3, 2) and S12 contains those for (5, 3, 0, 7, 6, 2, 1, 4). (20 points)
+Sbox1 <-function(b){
+  
+  b <-unlist(strsplit(b,""))
+  S11 <- binary(c(5,2,1,6,3,4,7,0))
+  S12 <- binary(c(1,4,6,2,0,7,5,3))
+  
+  tempVal <- unbinary(paste(b[2:4],collapse = ''))
+  tempRet <- ifelse((b[1] == "0"),S11[tempVal+1],S12[tempVal+1])
+  
+  #print("BOX 1")
+  return(tempRet)
+  
+}
+
+Sbox2 <- function(b){
+  
+  b <- unlist(strsplit(b,""))
+
+  S11 <- binary(c(4,0,6,5,7,1,3,2))
+  S12 <- binary(c(5,3,0,7,6,2,1,4))
+  
+  temp <- unbinary(paste(b[2:4],collapse = ''))
+  #print("BOX 2")
+
+  tempRes <- ifelse((b[1] == "0"),S11[temp+1], S12[temp+1])
+  
+  return(tempRes)
+  
+}
+
+Sbox2("0101")
+Sbox2("1010")
+
+Sbox1("0101")
+Sbox1("1010")
+
+```
+
+## Question 2
+```{r}
+
+# 2.	Create a round function called round1() that takes a binary character vector of length 12 and key K of length 9 and does the following: (20 points total)
+
+round1 <- function(block,K){
+  
+block <- unlist(strsplit(block,""))
+K <- unlist(strsplit(K,""))
+print(block)
+
+#a	Divide the block into two equal halves called L0 and R0. 
+
+L0 <- block[1:6]
+R0 <- block[7:12]
+#print(L0)
+#print(R0)
+
+#b.	Create two sub keys K1 containing the first 8 digits of K and K2 that contains the last 8 digits of K.
+
+K1 <- K[1:8]
+K2 <- K[2:9]
+
+print("K1")
+print(K1)
+#print(K2)
+
+#c.	Expand R0 from 6 t o 8 bits and call it ER0.
+
+ER0 <- vector(mode ="character")
+swap(R0[3],R0[4])
+ER0[1:4] <- R0[1:4]
+ER0[5:8] <- R0[3:6]
+
+#print(ER0)
+
+
+#d.	Take the XOR of the result of ER0 with K1. Store the first 4 bits in a variable called block1 and the last 4 bits in a variable called block2.
+
+temp <- bitwXor(unbinary(paste(ER0,collapse = '')),unbinary(paste(K1, collapse = '')))
+temp <-binary(temp,mb=7)
+temp <-unlist(strsplit(temp,''))
+
+
+block1 <- temp[1:4]
+block2 <- temp[5:8]
+
+#print(block1)
+#print(block2)
+
+#e.	Call Sbox1() with block1 as its parameter.
+
+SR01 <- Sbox1(block1)
+#print(SR01)
+
+
+#f.	Call Sbox2() with block2 as its parameter.
+
+SR02 <- Sbox2(block2)
+#print(SR02)
+
+
+#g.	Concatenate the results of e) and f) and store the result in a variable called FR0.
+##use paste function forces thigns together
+
+FR0 <- paste(SR01,SR02,sep= "")
+FR0 <- unlist(strsplit(FR0,''))
+#print(FR0)
+#print(L0)
+
+#h.	Take the XOR of FR0 and L0 and store the results in R1.
+
+R1 <- bitwXor(unbinary(paste(FR0,collapse = '')),unbinary(paste(L0, collapse = '')))
+
+R1 <-binary(R1,5)
+R1 <-unlist(strsplit(R1,''))
+#print(R1)
+
+
+#i.	Store R0 to L1.
+
+L1 <- R0
+#print(L1)
+
+#j.	Return L1 concatenated to R1.
+
+L1 <- paste(L1,R1,sep = "")
+L1 <- unlist(strsplit(L1, ''))
+
+print("L1")
+return(L1)
+
+
+}
+#k.	Test the function round1() with the following input parameters: round1('000001010111', "001101100")
+
+round1("000001010111","001101100")
+
+
+
+```
+##Question 3
+
+```{r}
+
+#3.	Write a second function called round2()  that is similar to round1()  except that it uses K2 and returns the concatenation of R2 and L2. (20 points)
+
+
+round2 <- function(block,K){
+  
+block <- unlist(strsplit(block,""))
+K <- unlist(strsplit(K,""))
+
+#a	Divide the block into two equal halves called L0 and R0. 
+
+L0 <- block[1:6]
+R0 <- block[7:12]
+#print(L0)
+#print(R0)
+
+#b.	Create two sub keys K1 containing the first 8 digits of K and K2 that contains the last 8 digits of K.
+
+K1 <- K[1:8]
+K2 <- K[2:9]
+
+#print(K1)
+print("K2")
+print(K2)
+
+#c.	Expand R0 from 6 t o 8 bits and call it ER0.
+
+ER0 <- vector(mode ="character")
+swap(R0[3],R0[4])
+ER0[1:4] <- R0[1:4]
+ER0[5:8] <- R0[3:6]
+
+#print(ER0)
+
+
+#d.	Take the XOR of the result of ER0 with K2. Store the first 4 bits in a variable called block1 and the last 4 bits in a variable called block2.
+
+temp <- bitwXor(unbinary(paste(ER0,collapse = '')),unbinary(paste(K2, collapse = '')))
+temp <-binary(temp,mb=7)
+temp <-unlist(strsplit(temp,''))
+
+
+block1 <- temp[1:4]
+block2 <- temp[5:8]
+
+#print(block1)
+#print(block2)
+
+#e.	Call Sbox1() with block1 as its parameter.
+
+SR01 <- Sbox1(block1)
+#print(SR01)
+
+
+#f.	Call Sbox2() with block2 as its parameter.
+
+SR02 <- Sbox2(block2)
+#print(SR02)
+
+
+#g.	Concatenate the results of e) and f) and store the result in a variable called FR0.
+##use paste function forces thigns together
+
+FR0 <- paste(SR01,SR02,sep= "")
+FR0 <- unlist(strsplit(FR0,''))
+#print(FR0)
+#print(L0)
+
+#h.	Take the XOR of FR0 and L0 and store the results in R2.
+
+R2 <- bitwXor(unbinary(paste(FR0,collapse = '')),unbinary(paste(L0, collapse = '')))
+
+R2 <-binary(R2,5)
+R2 <-unlist(strsplit(R2,''))
+#print(R2)
+
+
+#i.	Store R0 to L1.
+
+L2 <- R0
+#print(L2)
+
+#j.	Return L2 concatenated to R2.
+
+L2 <- paste(L2,R2,sep = "")
+L2 <- unlist(strsplit(L2, ''))
+
+print("L2")
+return(L2)
+
+  
+}
+round2("000001010111","001101100")
+
+
+```
+
+
+##Question 4
+
+```{r}
+#4.	Write an encryption function: des_ecrypt() by using the work from 1-3 above.. Encrypt the message” “Wire $2000 to Bob” using the functions you wrote above following the simplified DES discussed in the class. (20 points)
+
+
+des_ecrypt <- function(msg){
+  
+  key <- "001101100"
+  print(msg)
+  print("Original Message in Binary")
+  msgBin <- as.integer(unlist(strsplit(binary(utf8ToInt(msg)),'')))
+  print(msgBin)
+  
+  j <-1
+  k <-1
+  b<-1
+  for(i in 1:length(msgBin)){
+    
+    if(mod(i,7)== 0){
+      print("New Character Being Encrypted")
+      value <- msgBin[j:i]
+      value<-as.character(value)
+      value <- paste(value,sep=" ",collapse ="")
+      value <- paste('00000',value,sep="")
+      print(value)
+      j =i+1
+      R1 <- round1(value,key)
+      print(R1)
+      R2<- round2(R1,key)
+      print("Encrypted Value")
+      R2<- paste(R2,sep=" ",collapse ="")
+      print(R2)
+      b[k] <- R2
+      k<-k+1
+     
+    }
+    
+  }
+  print("Fully Encrypted Text")
+  print(b)
+  return(b)
+}
+
+test <- des_ecrypt("Wire $2000 to Bob")
+
+
+
+```
+
+##Question 5
+
+```{r}
+
+#5.	Write a decryption function des_decrypt() as follows. Modify the functions round1() and round2()  such that they can be used for decryption. [Hint: for decryption use K2 instead of K1 for round1() and K1 instead of K2 for round2()]. (20 points)
+des_decrypt <- function(encMsg){
+  
+  print(encMsg)
+  key <- "001101100"
+  
+  k<-1
+  b<-1
+  for(i in 1:length(encMsg)){
+    
+    #round 2 decryption
+    r2dec <- round2(encMsg[i],"000110110")
+    print(r2dec)
+    
+    #round 1 decryption
+    r1dec <- round1(r2dec,"011011000")
+    r1dec <- r1dec[6:12]
+    r1dec<- paste(r1dec,sep=" ",collapse ="")
+    print(r1dec)
+    b[k] <- r1dec
+    k <- k+1
+  }
+  
+print("Fully Decrypted Text")
+return(b)
+  
+  
+}
+des_decrypt(test)
+```

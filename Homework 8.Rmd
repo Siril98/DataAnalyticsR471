@@ -1,0 +1,198 @@
+---
+title: "Homework 8"
+author: "Siril Pattammady"
+date: "4/20/2020"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(compositions)
+library(numbers)
+library(seqinr)
+```
+
+
+
+##Question 1
+```{r}
+#Question 1. Create an encryption function that takes a message (M), encryption exponent (e) and modulus
+#(N) as input parameters and returns the cipher-text for M as output. Test the encryption function with the following input: M = 8, e = 3, N = 33. (20 points)
+
+#Example: C<-RSA_encrypt(8,3,33) should return C = 17
+
+RSA_encrypt <- function(M,e,N){
+  
+  C <- vector(mode ='integer')
+
+  
+  for(i in 1:length(M)){
+    
+    C[i] <-modpower(M[i],e,N)
+    
+  }
+
+  return(C)
+  
+}
+C <- RSA_encrypt(8,3,33)
+print(C)
+
+
+```
+
+
+
+##Question 2
+```{r}
+
+#2. Create a decryption function that takes the cipher-text (C), the decryption exponent (d), and
+#the modulus (N) as input parameters and returns the message (M) as output. Tesr that the decryption
+#function works by using C and N from question 1 and d = 7. (20 points)
+
+#Example: RSA_decrtypt(C,7,N) should return 8, which is the message M.
+
+RSA_decrypt <- function(C,d,N){
+ 
+  M <- vector(mode ='integer')
+  
+  for(i in 1:length(C)){
+    M[i] <- modpower(C[i],d,N)
+  }
+  
+  return(M)
+
+}
+
+M1<- RSA_decrypt(C,7,33)
+print(M1)
+
+
+
+```
+
+
+##Question 3 & 4
+```{r}
+
+#3. Encrypt the following message with the encryption function from question 1: “Attack at 1300
+#hours”. (20 points).
+
+#  p and q are random prime numbers (use Primes() fuction from numbers package). Choose p from a
+# range [150, 170] and q from range [290, 350] -- DONE
+# • Calculate N and phi from p and q (follow the steps shown in last Friday’s class lecture)-- done
+# • Take another prime number e such that e and phi are co-prime -- Done
+# • Calculate d as the modular inverse of e mod phi -- Done
+# • You need to set these values only once outside the encrypt and decrypt functions
+
+  
+M<-utf8ToInt("Attack at 1300 hours")
+print("Original Msg")
+M
+p <- Primes(150,170)[1]
+q <- Primes(290,350)[1]
+N <- p*q
+
+phi <- (p-1)*(q-1)
+e <- Primes(30,50)[1]
+test <- coprime(phi,e)
+if(test <- "true"){
+  e <-e
+}
+d <- modinv(e,phi)
+
+print("Encrypted Message")
+C1<- RSA_encrypt(M,e,N)
+print(C1)
+
+
+#4.Decrypt the cipher-text from question 3 using the decryption function from question 2. (5points)
+
+print("Decrypted message")
+M1<-RSA_decrypt(C1,d,N)
+print(M1)
+
+
+
+```
+
+
+##Question 5
+```{r}
+
+# 5. Suppose Alice and Bob want to securely share a key. Select a generator (g), modulus (p), and
+# the exponents for Alice (a) and Bob (b). Show the following:
+
+p <- Primes(83,150)[1]
+g <- 2^30
+a <- 469
+b <- 374
+
+# (1) The number that Alice sends to Bob.
+
+num_a <- modpower(g,a,p)
+num_a
+
+# (2) The number that Bob sends to Alice.
+
+num_b <- modpower(g,b,p)
+num_b
+# (3) The shared key. (10 points total)
+
+ab <- a*b
+
+key <- modpower(g,ab,p)
+key
+
+```
+
+##Question 6
+```{r}
+
+#6. Using the shared key send the following message: “Meet me at noon” xored with the key. (5points)
+
+Msg <- "Meet me at noon"
+convertToBit<- utf8ToInt(Msg)
+encryMsg <- bitwXor(convertToBit,key)
+
+print(encryMsg)
+
+
+```
+
+
+##Question 7
+```{r}
+
+ #7. Show how you will get decrypt the cipher to get back the message. (5 points)
+
+cipherDecry <- bitwXor(encryMsg,key)
+convertToPlain <- intToUtf8(cipherDecry)
+convertToPlain
+
+```
+
+
+##Question 8
+```{r}
+
+#8.. It is public information that g=8, p=97, and Alice used modpower(g,a,p)=12. Run the above
+# with all values of a from 1 to p-1. Explain in a sentence why a brute force attack will work or not. (15 points)
+g <-8
+p<-97
+a <- 17
+for(i in 1:p){
+  value <- modpower(g,a,p-1)
+  print(value)
+  p <-p-1
+}
+
+#Answer
+# A brute force attack will not work because from running values from 1 to p-1 will take quite a while to exectute in order to find the value depending on the size of p. Even if all individual values can be distinguished it may not help because there are multiple variability in each turn around resulting in inefficent data values for the hacker.
+```
+
+
+
+

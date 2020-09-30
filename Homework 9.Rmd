@@ -1,0 +1,155 @@
+---
+title: "Homework 9"
+author: "Siril Pattammady"
+date: "4/27/2020"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(numbers)
+library(compositions)
+library(seqinr)
+library(openssl)
+```
+
+
+##Question 1
+```{r}
+
+#1. Create the raw vector for the message: “Top secret clearance for James Bond, Password: 007”.
+#Next, generate a 512 bit public key using rsa_keygen() Test the results. (10 points)
+
+msg <- charToRaw("Top secret clearnace for James Bond, Password: 007")
+msg
+
+key <- rsa_keygen(512)
+pubkey <- key$pubkey
+pubkey
+#pubkey$data
+```
+
+##Question 2
+```{r}
+
+#2. Create the ciphertext of the message using e and n. Use the function bignum_mod_exp()
+#to calculate me mod n. (10 points)
+
+e<-pubkey$data$e
+n<-pubkey$data$n
+msg <- bignum(msg)
+
+c <-bignum_mod_exp(msg,e,n)
+c
+print("Ciphertext")
+rawToChar(c)
+
+
+```
+
+
+
+##Question 3
+```{r}
+
+
+#3. Decyypt ciphertext of the message using c, d and n. Use the function bignum_mod_exp()
+#to calculate c e mod n. Show the plain text of the original message. (10 points)
+
+
+d <- key$data$d
+original <- bignum_mod_exp(c,d,n)
+ptext<- rawToChar(original)
+
+ptext
+
+
+```
+
+##Question 4
+```{r}
+
+# #4. Download and verify the digital certificate of your favorite website (must be secured). Print out
+# the following: the date till which the certificate is valid, if the certificate is self-certified, and the algorithm used to create the digital signature. (20 points)
+
+
+chain <-download_ssl_cert("www.netflix.com",443)
+print(chain)
+
+cert_data <- as.list(chain[[1]])
+cert_verify(chain,ca_bundle())
+
+cert_data
+
+```
+
+##Question 5
+```{r}
+
+#5. Using elastic curve Diffie Hellman create the public and private key pairs for three
+# parties: sender, receiver, and intruder. Generate the shared key for the sender and receiver. Generate a second key for the intruder using the public key of the sender. Show that the two keys are different. (30 points)
+
+#Private Keys
+sender_key <- ec_keygen("P-521")
+receiver_key <- ec_keygen("P-521")
+intruder_key <- ec_keygen("P-521")
+
+#Public Keys
+sender_pub <- as.list(sender_key)$pubkey
+receiver_pub <- as.list(receiver_key)$pubkey
+intruder_pub <- as.list(intruder_key)$pubkey
+
+#Shared Key for Sender and Receiver
+ec_dh(sender_key,receiver_pub)
+ec_dh(receiver_key,sender_pub)
+
+#Second Intruder Key and Original
+print("Intruder Key 2")
+intruder_key2 <- as.list(sender_key)$pubkey
+intruder_key2
+print("Intruder Key 1")
+intruder_pub
+
+```
+
+
+##Question 6
+```{r}
+# #6. Using envelope encryption and decryption encrypt and decrypt (1) iris data, and (2) the image
+# of boat (20 points)
+
+
+#1) Iris Data
+key2 <- rsa_keygen()
+pubkey2 <- key2$pubkey
+head(iris)
+#Encrypt
+msg <- serialize(head(iris),NULL)
+out <- encrypt_envelope(msg,pubkey2)
+str(out)
+#Decrypt
+orig <- decrypt_envelope(out$data, out$iv, out$session, key2)
+unserialize(orig)
+
+#2) Boat Image
+
+#Encrypt
+library(jpeg)
+key3 <-rsa_keygen()
+pubkey3 <- key3$pubkey
+img <-readJPEG("/Users/psiri/Documents/R/boat.jpg")
+img <-serialize(img,NULL)
+print("Boat Image Encryption")
+out <- encrypt_envelope(img,pubkey3)
+str(out)
+
+#Decrypt
+orig2 <- decrypt_envelope(out$data,out$iv, out$session,key3)
+orig_img <- unserialize(orig2)
+plot(1:2,type='n')
+rasterImage(orig_img,1,1,1.5,2)
+
+
+```

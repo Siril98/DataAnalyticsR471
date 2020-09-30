@@ -1,0 +1,209 @@
+---
+title: "Homework 2"
+author: "Siril Pattammady"
+date: "2/14/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Homework 2
+
+## Question 1
+
+```{r}
+#a)Store the text into a character variable “ptext”
+
+ptext <- "Members of the Senate and of the House of Representatives of the United States, I feel greatly honored that you should have thus invited me to enter the United States Senate Chamber and address the representatives of both branches of Congress. The fact that my American forebears have for so many generations played their part in the life of the United States, and that here I am, an Englishman, welcomed in your midst, makes this experience one of the most moving and thrilling in my life, which is already long and has not been entirely uneventful. I wish indeed that my mother, whose memory I cherish, across the vale of years, could have been here to see. By the way, I cannot help reflecting that if my father had been American and my mother British instead of the other way around, I might have got here on my own. In that case this would not have been the first time you would have heard my voice. In that case I should not have needed any invitation. But if I had it is hardly likely that it would have been unanimous. So perhaps things are better as they are."
+
+
+
+
+#b)Spilt the text into individual characters. [Hint: use strsplit()]
+
+textSplit <- strsplit(ptext,"")
+
+
+```
+
+```{r}
+#c)Store all characters in ptext into a character vector. [Hint: use unlist()]
+# done correctly should take length of unlisted variable and should be large number
+#PTEXT -- capitalze-- then remove non numeric --> then unlist
+
+ptext_unlisted <- unlist(textSplit)
+
+
+#d)Change all text to upper case. [Hint: Use toupper]
+
+upperCase <- toupper(ptext_unlisted)
+
+
+#e)	Remove all non-alphabetic characters. [Hint: use gsub()]
+
+
+removeAlpha <- gsub("[[:punct:]' ']","",upperCase)
+
+
+#f)	Tabulate the frequencies of all characters. [Hint:  use table()]
+
+splitChar <- unlist(strsplit(removeAlpha,""))
+tabulated <- table(splitChar)
+
+
+#g)Assign the following to a variable named “key”: ZGYHXIWJVKULTMSARBQCPDOENF. These correspond to the characters in the alphabet such that “Z” substitutes “A”, etc. Repeat steps (b) and (c) for the variable named key.
+
+key <- "ZGYHXIWJVKULTMSARBQCPDOENF"
+
+keySplit <- strsplit(key,"")
+keyUnlist <- unlist(keySplit)
+
+
+#h)	Assign all uppercase letters of the alphabet to a variable called “alpha”. Repeat steps (b) and (c) for the variable named alpha.
+
+alpha <- "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+alphaSplit <- strsplit(alpha,"")
+alphaUnlist <-unlist(alphaSplit)
+
+
+
+#i)	Find the number of characters in ptext. [Hint: use nchar()]
+
+numberpText <- nchar(ptext)
+
+
+#j)	Using the variables alpha and key, encrypt ptext into a variable named ctext.
+
+#test <- setNames(keyUnlist,alphaUnlist)
+
+#test <- mgsub(alphaUnlist,keyUnlist,upperCase)
+
+#for(i in 1:26){
+  
+ # ctext<-gsub(alphaUnlist[i],keyUnlist[i],upperCase)
+  #upperCase <- ctext
+#  print(alphaUnlist[i]) 
+
+#}
+size <- length(removeAlpha)-1
+i=1
+while(i < size) {
+  for(j in 1:length(alphaUnlist)){
+    
+    if(removeAlpha[i] == alphaUnlist[j]){
+      removeAlpha[i]<-keyUnlist[j]
+    
+      i<-i+1
+    }
+    if(removeAlpha[i] == ""){
+      i<-i+1
+    }
+  }
+}
+
+removeAlpha
+
+
+
+
+```
+
+
+## Question 2
+```{r}
+#2.	Put the steps in question 1 in a function that will take any text and a key as input and return the cipher text as output. Call this substitution_encrypt(). (20 points)
+
+
+subsitution_encrypt<- function(plain,key){
+
+textSplit <- strsplit(plain,"")
+ptext_unlisted <- unlist(textSplit)
+upperCase <- toupper(ptext_unlisted)
+removeAlpha <- gsub("[[:punct:]' ']","",upperCase)
+
+
+keySplit <- strsplit(key,"")
+keyUnlist <- unlist(keySplit)
+
+alpha <- "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+alphaSplit <- strsplit(alpha,"")
+alphaUnlist <-unlist(alphaSplit)
+
+
+size <- length(removeAlpha)+1
+i=1
+
+while(i < size) {
+  for(j in 1:length(alphaUnlist)){
+    
+    if(removeAlpha[i] == alphaUnlist[j]){
+
+      removeAlpha[i]<-keyUnlist[j]
+      i<-i+1
+      if(i == size){
+        return(removeAlpha)
+      }
+    }
+    if(removeAlpha[i] == ""){
+      i<-i+1
+    }
+    if(i == size-1){
+      removeAlpha[i]<-keyUnlist[j]
+      return(removeAlpha)
+    }
+  }
+}
+#return(removeAlpha)
+}
+
+```
+##Question 3
+```{r}
+#3. Create a second function called substitution_decrypt() that will take an encrypted text and a key as input and return the plain text as output. (20 points)
+subsitution_decrypt<- function(cipher,key){
+
+textSplit <- strsplit(cipher,"")
+ptext_unlisted <- unlist(textSplit)
+upperCase <- toupper(ptext_unlisted)
+removeAlpha <- gsub("[[:punct:]' ']","",upperCase)
+
+
+keySplit <- strsplit(key,"")
+keyUnlist <- unlist(keySplit)
+
+alpha <- "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+alphaSplit <- strsplit(alpha,"")
+alphaUnlist <-unlist(alphaSplit)
+
+
+size <- length(removeAlpha)+1
+i=1
+
+while(i < size) {
+  for(j in 1:length(alphaUnlist)){
+    
+    if(removeAlpha[i] == keyUnlist[j]){
+
+      removeAlpha[i]<-alphaUnlist[j]
+      i<-i+1
+      if(i == size){
+        return(removeAlpha)
+      }
+    }
+    if(removeAlpha[i] == ""){
+      i<-i+1
+    }
+    if(i == size-1){
+      removeAlpha[i]<-keyUnlist[j]
+      return(removeAlpha)
+    }
+  }
+}
+}
+
+```

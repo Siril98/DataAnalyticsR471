@@ -1,0 +1,200 @@
+---
+title: "Homework 5"
+author: "Siril Pattammady"
+date: "3/6/2020"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(compositions)
+library(numbers)
+library(seqinr)
+```
+
+# Homework 5
+
+## Question 1
+
+```{r}
+#1.	Store the following binary number as a character string s: “111000”.  (10 points)
+
+
+S <- "111000"
+S
+
+
+```
+
+## Question 2
+```{r}
+#2.Convert this into a character vector v. (10 points)
+
+V <- as.vector(unlist(strsplit(S,split ="")))
+V
+
+
+```
+
+
+## Question 3
+```{r}
+
+#3.	Expand the character vector v to 8 bits as follows: swap v[3] and v[4] . (10 points)
+
+##Original Length of 6
+V
+length(V)
+
+##Expansion to 8 bits
+for (i in 1:length(V)) {
+  
+  if(length(V) < 8){
+    V <- append(V,0)
+  }
+  
+}
+length(V)
+V
+
+##Swapping Values
+swap(V[3],V[4])
+V
+
+```
+
+##Question 4
+
+```{r}
+
+#4.Replicate v[3] and v[4] .The result (call it ev) should be a character vector of size 8. (10 points)
+
+##Not sure if Replicate Meant this or ev2
+V[7] <- V[3]
+V[8] <- V[4]
+
+ev <- V
+
+ev
+
+ev2 <- V
+for(i in 1:length(V)){
+  
+  if(mod(i,2) == 0){
+    ev2[i] <- V[3]
+  }
+  else{
+    ev2[i] <- V[4]
+  }
+  
+}
+
+ev2
+
+
+```
+
+##Question 5
+
+
+```{r}
+
+#5.Write a function called expand() that takes a binary vector of size 6 as input and returns a binary vector of size 8 as output. (20 points)
+
+expand <- function(binaryVector){
+  
+  binaryVec <- as.vector(unlist(strsplit(binaryVector,split ="")))
+
+  
+  for(i in 1:length(binaryVec)){
+    
+    if(length(binaryVec) < 8){
+      binaryVec <- append(binaryVec,0)
+    }
+  }
+  
+  return(binaryVec)
+}
+
+expand("110111")
+```
+
+
+##Question 6
+```{r}
+
+#6.Create two character vectors S11 and S12 such that S11 contains the binary representations of the numbers (5,2,1,6,3,4,7,0), and S12 contains those of the numbers (1,4,6,2,0,7,5,3). (10 points)
+
+
+S11 <- binary(c(5,2,1,6,3,4,7,0))
+S12 <- binary(c(1,4,6,2,0,7,5,3))
+
+S11
+S12
+
+
+
+```
+
+##Question 7
+
+```{r}
+#7.	Let b=”1101”. Extract the last three characters. Convert the last three characters into decimal and store it in a variable called tempVal.  Write an “if-then-else” statement such that if b[1] == 0 retrieve the value of S11[tempval]. If b[1]==1  retrieve the value of S12[tempval]  and store it in a variable tempRet. (Hint: You might need to shift the indices by 1) (10 points)
+
+b <- "1101"
+b <- unlist(strsplit(b,split =""))
+extractB <- b[2:4]
+
+tempVal <- unbinary(paste(extractB, collapse = ""))
+tempVal
+
+if(b[1] == "0"){
+  tempRet <- S11[tempVal]
+}
+
+if(b[1] == "1"){
+  tempRet <- S12[tempVal]
+}
+
+tempRet
+
+
+
+
+```
+
+##Question 8
+
+```{r}
+
+#8 Write a function called S11_function that takes a block of 4-character binary (such as “1110”) and, using the two s-boxes from question 6, returns a 3-character binary number using the logic that if the first character is “0” then use S11, otherwise use S12.  (20 points)
+
+S11_function <- function(block){
+  
+  ##Splits block and saves last 3 values
+  block <- unlist(strsplit(block,split =""))
+  extractBlock <- block[2:4]
+  
+  ##Determines index to return binary value
+  posVal <- unbinary(paste(extractBlock, collapse = ""))
+  #print(posVal)
+  
+  ##Returns 3-Char binary ofS value in #6 based of first value
+  if(block[1] == "0"){
+    return(S11[posVal])
+  }
+  
+  if(block[1] == "1"){
+    return(S12[posVal])
+  }
+  
+}
+
+S11_function("1110")
+S11_function("0100")
+
+```
+
+
